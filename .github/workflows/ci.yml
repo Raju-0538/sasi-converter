@@ -1,0 +1,25 @@
+name: Converter CI
+
+on:
+  push:
+    branches:
+      - "main"  # Trigger the workflow on pushes to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4  # Checkout the code from the repository
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4  # Set up Node.js environment
+      with:
+        node-version: 18  # Use the Node.js version of your choice
+
+    - name: Install dependencies
+      run: npm install  # Install project dependencies using npm
+
+    - name: Run Jest tests
+      run: npm test  # Run Jest tests using npm
