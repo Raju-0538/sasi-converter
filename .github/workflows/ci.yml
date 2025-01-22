@@ -1,25 +1,35 @@
 name: Converter CI
-
 on:
   push:
-    branches:
-      - "main"  # Trigger the workflow on pushes to the main branch
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
-
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4  # Checkout the code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Run Jest tests
+        run: npm test
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4  # Set up Node.js environment
-      with:
-        node-version: 18  # Use the Node.js version of your choice
-
-    - name: Install dependencies
-      run: npm install  # Install project dependencies using npm
-
-    - name: Run Jest tests
-      run: npm test  # Run Jest tests using npm
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push Docker image
+        run: |
+          docker build -t glarimy/sasi-converter:latest .
+          docker push glarimy/sasi-converter:latest
