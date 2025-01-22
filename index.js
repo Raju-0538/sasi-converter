@@ -1,33 +1,21 @@
-// index.js
-const readline = require('readline');
-const convert = require('./convert');  // Import the convert function
+const express = require('express');
+const convert = require('./convert');
+const app = express();
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+app.use(express.json());
+
+app.get('/convert', (req, res) => {
+  const { inr } = req.query;
+  if (!inr) {
+    return res.status(400).json({ error: 'Missing required query parameters' });
+  }
+  try {
+    const usd = convert(inr);
+    res.json({ inr, usd });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
 });
 
-// Function to prompt the user for input and process conversion
-const promptUser = () => {
-    rl.question('Enter amount (INR) or type "exit" to quit: ', (input) => {
-        if (input.toLowerCase() === 'exit') {
-            console.log("Goodbye!");
-            rl.close();
-            return;
-        }
-
-        const inr = parseFloat(input);
-
-        try {
-            const usd = convert(inr);  // Call convert function
-            console.log(`INR ${inr} = USD ${usd}\n`);
-        } catch (e) {
-            console.log(e);  // Handle any errors (like invalid input)
-        }
-
-        promptUser();  // Recursively prompt the user
-    });
-};
-
-// Start prompting the user
-promptUser();
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
